@@ -41,6 +41,14 @@ class ExchangeRate extends DataObject {
     'BaseCurrency' => 'Base Currency',
     'Rate' => 'Rate'
   );
+
+  public function onBeforeWrite() {
+  	parent::onBeforeWrite();
+
+  	$shopConfig = ShopConfig::current_shop_config();
+  	$this->BaseCurrency = $shopConfig->BaseCurrency;
+  	$this->BaseCurrencySymbol = $shopConfig->BaseCurrencySymbol;
+  }
 	
   /**
    * Field for editing a {@link ExchangeRate}.
@@ -50,24 +58,42 @@ class ExchangeRate extends DataObject {
   public function getCMSFields() {
 
   	$shopConfig = ShopConfig::current_shop_config();
-
-  	// SS_Log::log(new Exception(print_r($shopConfig->toMap(), true)), SS_Log::NOTICE);
-  	// SS_Log::log(new Exception(print_r($shopConfig->BaseCurrency, true)), SS_Log::NOTICE);
-  	// SS_Log::log(new Exception(print_r($shopConfig->BaseCurrencySymbol, true)), SS_Log::NOTICE);
+  	$baseCurrency = $shopConfig->BaseCurrency;
 
     return new FieldList(
       $rootTab = new TabSet('Root',
         $tabMain = new Tab('ExchangeRate',
         	TextField::create('Title'),
-          TextField::create('Currency', _t('ExchangeRate.CURRENCY', ' Currency')),
-          TextField::create('CurrencySymbol', _t('ExchangeRate.SYMBOL', 'Symbol')),
-          NumericField::create('Rate', _t('ExchangeRate.RATE', 'Rate')),
-
-          TextField::create('BaseCurrency', _t('ExchangeRate.BASE_CURRENCY', 'Base Currency'), $shopConfig->BaseCurrency),
-          TextField::create('BaseCurrencySymbol', _t('ExchangeRate.SYMBOL', 'Symbol'), $shopConfig->BaseCurrencySymbol)
+          TextField::create('Currency', _t('ExchangeRate.CURRENCY', ' Currency'))
+          	->setRightTitle('3 letter currency code - <a href="http://en.wikipedia.org/wiki/ISO_4217#Active_codes" target="_blank">available codes</a>'),
+          TextField::create('CurrencySymbol', _t('ExchangeRate.SYMBOL', 'Symbol'))
+          	->setRightTitle('Symbol to use for this currency'),
+          NumericField::create('Rate', _t('ExchangeRate.RATE', 'Rate'))
+          	->setRightTitle("Rate to convert from $baseCurrency")
         )
       )
     );
+  }
+
+  public function getCMSValidator() {
+  	return new RequiredFields(array(
+  		'Title',
+  		'Currency',
+  		'Rate'
+  	));
+  }
+
+  public function validate() {
+
+  	$result = new ValidationResult(); 
+
+    if (!$this->Title || !$this->Currency || !$this->Rate) {
+    	$result->error(
+	      'Rate is missing a required field',
+	      'ExchangeRateInvalidError'
+	    );
+    }
+    return $result;
   }
 	
 }
@@ -103,6 +129,13 @@ class ExchangeRate_Admin extends ShopAdmin {
     'ShopConfig/ExchangeRate/ExchangeRateSettingsForm' => 'ExchangeRateSettingsForm',
     'ShopConfig/ExchangeRate' => 'ExchangeRateSettings'
   );
+
+  public function init() {
+		parent::init();
+		if (!in_array(get_class($this), self::$hidden_sections)) {
+			$this->modelClass = 'ShopConfig';
+		}
+	}
 
   public function Breadcrumbs($unlinked = false) {
 
@@ -154,6 +187,16 @@ class ExchangeRate_Admin extends ShopAdmin {
 
     $shopConfig = ShopConfig::get()->First();
 
+    if(singleton($this->modelClass)->hasMethod('getCMSValidator')) {
+			$detailValidator = singleton($this->modelClass)->getCMSValidator();
+			$listField->getConfig()->getComponentByType('GridFieldDetailForm')->setValidator($detailValidator);
+		}
+
+    $config = GridFieldConfig_HasManyRelationEditor::create();
+    $detailForm = $config->getComponentByType('GridFieldDetailForm')->setValidator(
+  		singleton('ExchangeRate')->getCMSValidator()
+  	);
+
     $fields = new FieldList(
       $rootTab = new TabSet('Root',
         $tabMain = new Tab('ExchangeRates',
@@ -161,7 +204,7 @@ class ExchangeRate_Admin extends ShopAdmin {
             'ExchangeRates',
             'ExchangeRates',
             $shopConfig->ExchangeRates(),
-            GridFieldConfig_HasManyRelationEditor::create()
+            $config
           )
         )
       )
@@ -249,28 +292,38 @@ class ExchangeRate_PageControllerExtension extends Extension {
 
 		//Get the currencies
 		$config = ShopConfig::current_shop_config();
-		$exchangeRates = $config->ExchangeRates();
-		$currencies = array_combine($exchangeRates->column('Currency'), $exchangeRates->column('Title'));
 
-		$currency = Session::get('SWS.Currency');
-		if (!$currency) {
-			$currency = $config->BaseCurrency;
+		if ($config && $config->exists()) {
+			$exchangeRates = $config->ExchangeRates();
+
+			//If a rate does not exist for base currency 
+			if (!in_array($config->BaseCurrency, $exchangeRates->column('Currency'))) {
+				Session::clear('SWS.Currency');
+				return;
+			}
+
+			$currencies = array_combine($exchangeRates->column('Currency'), $exchangeRates->column('Title'));
+
+			$currency = Session::get('SWS.Currency');
+			if (!$currency) {
+				$currency = $config->BaseCurrency;
+			}
+
+			$fields = FieldList::create(
+				ExchangeRateField::create('Currency', ' ', $currencies, $currency)
+			);
+
+			$actions = FieldList::create(
+				FormAction::create('setCurrency', _t('GridFieldDetailForm.Save', 'Save'))
+			);
+
+			return new Form(
+	      $this->owner,
+	      'CurrencyForm',
+	      $fields,
+	      $actions
+	    );
 		}
-
-		$fields = FieldList::create(
-			ExchangeRateField::create('Currency', ' ', $currencies, $currency)
-		);
-
-		$actions = FieldList::create(
-			FormAction::create('setCurrency', _t('GridFieldDetailForm.Save', 'Save'))
-		);
-
-		return new Form(
-      $this->owner,
-      'CurrencyForm',
-      $fields,
-      $actions
-    );
 	}
 
 	public function setCurrency($data, $form) {
