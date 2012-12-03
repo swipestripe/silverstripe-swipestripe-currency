@@ -2,11 +2,6 @@
 /**
  * Exchange rates that can be set in {@link SiteConfig}. Several flat rates can be set 
  * for any supported shipping country.
- * 
- * @author Frank Mullenger <frankmullenger@gmail.com>
- * @copyright Copyright (c) 2011, Frank Mullenger
- * @package swipestripe
- * @subpackage shipping
  */
 class ExchangeRate extends DataObject {
   
@@ -100,11 +95,6 @@ class ExchangeRate extends DataObject {
 
 /**
  * So that {@link ExchangeRate}s can be created in {@link SiteConfig}.
- * 
- * @author Frank Mullenger <frankmullenger@gmail.com>
- * @copyright Copyright (c) 2011, Frank Mullenger
- * @package swipestripe
- * @subpackage shipping
  */
 class ExchangeRate_ShopConfigExtension extends DataExtension {
 
@@ -466,9 +456,3 @@ class ExchangeRate_OrderRelatedExtension extends DataExtension {
 		}
 	}
 }
-
-
-
-
-
-
