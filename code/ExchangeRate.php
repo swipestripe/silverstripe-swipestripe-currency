@@ -17,6 +17,7 @@ class ExchangeRate extends DataObject {
     'Rate' => 'Decimal(19,4)',
     'BaseCurrency' => 'Varchar(3)',
     'BaseCurrencySymbol' => 'Varchar(10)',
+    'SortOrder' => 'Int'
 	);
 	
 	/**
@@ -32,10 +33,13 @@ class ExchangeRate extends DataObject {
 
   static $summary_fields = array(
   	'Title' => 'Title',
+  	'CurrencySymbol' => 'Symbol',
     'Currency' => 'Currency',
     'BaseCurrency' => 'Base Currency',
     'Rate' => 'Rate'
   );
+
+  public static $default_sort = 'SortOrder';
 
   public function onBeforeWrite() {
   	parent::onBeforeWrite();
@@ -186,6 +190,9 @@ class ExchangeRate_Admin extends ShopAdmin {
     $detailForm = $config->getComponentByType('GridFieldDetailForm')->setValidator(
   		singleton('ExchangeRate')->getCMSValidator()
   	);
+  	if (class_exists('GridFieldSortableRows')) {
+      $config->addComponent(new GridFieldSortableRows('SortOrder'));
+    }
 
     $fields = new FieldList(
       $rootTab = new TabSet('Root',

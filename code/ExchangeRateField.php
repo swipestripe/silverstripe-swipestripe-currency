@@ -2,7 +2,7 @@
 
 class ExchangeRateField extends DropdownField {
 
-	function FieldHolder() {
+	function FieldHolder($properties = array()) {
 
 		Requirements::javascript(THIRDPARTY_DIR . '/jquery/jquery.js');
 		Requirements::javascript('swipestripe-currency/javascript/ExchangeRateField.js');
