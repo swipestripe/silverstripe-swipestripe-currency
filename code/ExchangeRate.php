@@ -342,9 +342,6 @@ class ExchangeRate_PageControllerExtension extends Extension {
 
 		if (in_array($currency, $currencies)) {
 			Session::set('SWS.Currency', $currency);
-
-
-			//
 		}
 		$this->owner->redirectBack();
 	}

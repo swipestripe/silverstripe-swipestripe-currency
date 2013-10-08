@@ -1,0 +1,28 @@
+---
+name: SwipeStripe Currency
+---
+
+Product:
+  extensions: 
+    - 'ExchangeRate_Extension'
+Variation:
+  extensions: 
+    - 'ExchangeRate_Extension'
+Order:
+  extensions: 
+    - 'ExchangeRate_OrderExtension'
+Item:
+  extensions: 
+    - 'ExchangeRate_OrderRelatedExtension'
+ItemOption:
+  extensions: 
+    - 'ExchangeRate_OrderRelatedExtension'
+Modification:
+  extensions: 
+    - 'ExchangeRate_OrderRelatedExtension'
+ShopConfig:
+  extensions: 
+    - 'ExchangeRate_ShopConfigExtension'
+Page_Controller:
+  extensions: 
+    - 'ExchangeRate_PageControllerExtension'
