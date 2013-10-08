@@ -4,20 +4,20 @@
  * for any supported shipping country.
  */
 class ExchangeRate extends DataObject {
-  
-  /**
-   * Fields for this tax rate
-   * 
-   * @var Array
-   */
-  public static $db = array(
-    'Title' => 'Varchar',
-    'Currency' => 'Varchar(3)',
-    'CurrencySymbol' => 'Varchar(10)',
-    'Rate' => 'Decimal(19,4)',
-    'BaseCurrency' => 'Varchar(3)',
-    'BaseCurrencySymbol' => 'Varchar(10)',
-    'SortOrder' => 'Int'
+	
+	/**
+	 * Fields for this tax rate
+	 * 
+	 * @var Array
+	 */
+	private static $db = array(
+		'Title' => 'Varchar',
+		'Currency' => 'Varchar(3)',
+		'CurrencySymbol' => 'Varchar(10)',
+		'Rate' => 'Decimal(19,4)',
+		'BaseCurrency' => 'Varchar(3)',
+		'BaseCurrencySymbol' => 'Varchar(10)',
+		'SortOrder' => 'Int'
 	);
 	
 	/**
@@ -27,73 +27,73 @@ class ExchangeRate extends DataObject {
 	 * 
 	 * @var unknown_type
 	 */
-	static $has_one = array(
-    'ShopConfig' => 'ShopConfig'
-  );
+	private static $has_one = array(
+		'ShopConfig' => 'ShopConfig'
+	);
 
-  static $summary_fields = array(
-  	'Title' => 'Title',
-  	'CurrencySymbol' => 'Symbol',
-    'Currency' => 'Currency',
-    'BaseCurrency' => 'Base Currency',
-    'Rate' => 'Rate'
-  );
+	private static $summary_fields = array(
+		'Title' => 'Title',
+		'CurrencySymbol' => 'Symbol',
+		'Currency' => 'Currency',
+		'BaseCurrency' => 'Base Currency',
+		'Rate' => 'Rate'
+	);
 
-  public static $default_sort = 'SortOrder';
+	private static $default_sort = 'SortOrder';
 
-  public function onBeforeWrite() {
-  	parent::onBeforeWrite();
+	public function onBeforeWrite() {
+		parent::onBeforeWrite();
 
-  	$shopConfig = ShopConfig::current_shop_config();
-  	$this->BaseCurrency = $shopConfig->BaseCurrency;
-  	$this->BaseCurrencySymbol = $shopConfig->BaseCurrencySymbol;
-  }
+		$shopConfig = ShopConfig::current_shop_config();
+		$this->BaseCurrency = $shopConfig->BaseCurrency;
+		$this->BaseCurrencySymbol = $shopConfig->BaseCurrencySymbol;
+	}
 	
-  /**
-   * Field for editing a {@link ExchangeRate}.
-   * 
-   * @return FieldSet
-   */
-  public function getCMSFields() {
+	/**
+	 * Field for editing a {@link ExchangeRate}.
+	 * 
+	 * @return FieldSet
+	 */
+	public function getCMSFields() {
 
-  	$shopConfig = ShopConfig::current_shop_config();
-  	$baseCurrency = $shopConfig->BaseCurrency;
+		$shopConfig = ShopConfig::current_shop_config();
+		$baseCurrency = $shopConfig->BaseCurrency;
 
-    return new FieldList(
-      $rootTab = new TabSet('Root',
-        $tabMain = new Tab('ExchangeRate',
-        	TextField::create('Title'),
-          TextField::create('Currency', _t('ExchangeRate.CURRENCY', ' Currency'))
-          	->setRightTitle('3 letter currency code - <a href="http://en.wikipedia.org/wiki/ISO_4217#Active_codes" target="_blank">available codes</a>'),
-          TextField::create('CurrencySymbol', _t('ExchangeRate.SYMBOL', 'Symbol'))
-          	->setRightTitle('Symbol to use for this currency'),
-          NumericField::create('Rate', _t('ExchangeRate.RATE', 'Rate'))
-          	->setRightTitle("Rate to convert from $baseCurrency")
-        )
-      )
-    );
-  }
+		return new FieldList(
+			$rootTab = new TabSet('Root',
+				$tabMain = new Tab('ExchangeRate',
+					TextField::create('Title'),
+					TextField::create('Currency', _t('ExchangeRate.CURRENCY', ' Currency'))
+						->setRightTitle('3 letter currency code - <a href="http://en.wikipedia.org/wiki/ISO_4217#Active_codes" target="_blank">available codes</a>'),
+					TextField::create('CurrencySymbol', _t('ExchangeRate.SYMBOL', 'Symbol'))
+						->setRightTitle('Symbol to use for this currency'),
+					NumericField::create('Rate', _t('ExchangeRate.RATE', 'Rate'))
+						->setRightTitle("Rate to convert from $baseCurrency")
+				)
+			)
+		);
+	}
 
-  public function getCMSValidator() {
-  	return new RequiredFields(array(
-  		'Title',
-  		'Currency',
-  		'Rate'
-  	));
-  }
+	public function getCMSValidator() {
+		return new RequiredFields(array(
+			'Title',
+			'Currency',
+			'Rate'
+		));
+	}
 
-  public function validate() {
+	public function validate() {
 
-  	$result = new ValidationResult(); 
+		$result = new ValidationResult(); 
 
-    if (!$this->Title || !$this->Currency || !$this->Rate) {
-    	$result->error(
-	      'Rate is missing a required field',
-	      'ExchangeRateInvalidError'
-	    );
-    }
-    return $result;
-  }
+		if (!$this->Title || !$this->Currency || !$this->Rate) {
+			$result->error(
+				'Rate is missing a required field',
+				'ExchangeRateInvalidError'
+			);
+		}
+		return $result;
+	}
 	
 }
 
@@ -102,185 +102,185 @@ class ExchangeRate extends DataObject {
  */
 class ExchangeRate_ShopConfigExtension extends DataExtension {
 
-  /**
-   * Attach {@link ExchangeRate}s to {@link SiteConfig}.
-   * 
-   * @see DataObjectDecorator::extraStatics()
-   */
-  public static $has_many = array(
-    'ExchangeRates' => 'ExchangeRate'
-  );
+	/**
+	 * Attach {@link ExchangeRate}s to {@link SiteConfig}.
+	 * 
+	 * @see DataObjectDecorator::extraStatics()
+	 */
+	private static $has_many = array(
+		'ExchangeRates' => 'ExchangeRate'
+	);
 
 }
 
 class ExchangeRate_Admin extends ShopAdmin {
 
-  static $url_rule = 'ShopConfig/ExchangeRate';
-  static $url_priority = 150;
-  static $menu_title = 'Shop Exchange Rates';
+	static $url_rule = 'ShopConfig/ExchangeRate';
+	static $url_priority = 150;
+	static $menu_title = 'Shop Exchange Rates';
 
-  public static $url_handlers = array(
-    'ShopConfig/ExchangeRate/ExchangeRateSettingsForm' => 'ExchangeRateSettingsForm',
-    'ShopConfig/ExchangeRate' => 'ExchangeRateSettings'
-  );
+	public static $url_handlers = array(
+		'ShopConfig/ExchangeRate/ExchangeRateSettingsForm' => 'ExchangeRateSettingsForm',
+		'ShopConfig/ExchangeRate' => 'ExchangeRateSettings'
+	);
 
-  public function init() {
+	public function init() {
 		parent::init();
 		if (!in_array(get_class($this), self::$hidden_sections)) {
 			$this->modelClass = 'ShopConfig';
 		}
 	}
 
-  public function Breadcrumbs($unlinked = false) {
+	public function Breadcrumbs($unlinked = false) {
 
-    $request = $this->getRequest();
-    $items = parent::Breadcrumbs($unlinked);
+		$request = $this->getRequest();
+		$items = parent::Breadcrumbs($unlinked);
 
-    if ($items->count() > 1) $items->remove($items->pop());
+		if ($items->count() > 1) $items->remove($items->pop());
 
-    $items->push(new ArrayData(array(
-      'Title' => 'Exchange Rate Settings',
-      'Link' => $this->Link(Controller::join_links($this->sanitiseClassName($this->modelClass), 'ExchangeRate'))
-    )));
+		$items->push(new ArrayData(array(
+			'Title' => 'Exchange Rate Settings',
+			'Link' => $this->Link(Controller::join_links($this->sanitiseClassName($this->modelClass), 'ExchangeRate'))
+		)));
 
-    return $items;
-  }
+		return $items;
+	}
 
-  public function SettingsForm($request = null) {
-    return $this->ExchangeRateSettingsForm();
-  }
+	public function SettingsForm($request = null) {
+		return $this->ExchangeRateSettingsForm();
+	}
 
-  public function ExchangeRateSettings($request) {
+	public function ExchangeRateSettings($request) {
 
-    if ($request->isAjax()) {
-      $controller = $this;
-      $responseNegotiator = new PjaxResponseNegotiator(
-        array(
-          'CurrentForm' => function() use(&$controller) {
-            return $controller->ExchangeRateSettingsForm()->forTemplate();
-          },
-          'Content' => function() use(&$controller) {
-            return $controller->renderWith('ShopAdminSettings_Content');
-          },
-          'Breadcrumbs' => function() use (&$controller) {
-            return $controller->renderWith('CMSBreadcrumbs');
-          },
-          'default' => function() use(&$controller) {
-            return $controller->renderWith($controller->getViewer('show'));
-          }
-        ),
-        $this->response
-      ); 
-      return $responseNegotiator->respond($this->getRequest());
-    }
+		if ($request->isAjax()) {
+			$controller = $this;
+			$responseNegotiator = new PjaxResponseNegotiator(
+				array(
+					'CurrentForm' => function() use(&$controller) {
+						return $controller->ExchangeRateSettingsForm()->forTemplate();
+					},
+					'Content' => function() use(&$controller) {
+						return $controller->renderWith('ShopAdminSettings_Content');
+					},
+					'Breadcrumbs' => function() use (&$controller) {
+						return $controller->renderWith('CMSBreadcrumbs');
+					},
+					'default' => function() use(&$controller) {
+						return $controller->renderWith($controller->getViewer('show'));
+					}
+				),
+				$this->response
+			); 
+			return $responseNegotiator->respond($this->getRequest());
+		}
 
-    return $this->renderWith('ShopAdminSettings');
-  }
+		return $this->renderWith('ShopAdminSettings');
+	}
 
-  public function ExchangeRateSettingsForm() {
+	public function ExchangeRateSettingsForm() {
 
-    $shopConfig = ShopConfig::get()->First();
+		$shopConfig = ShopConfig::get()->First();
 
-    if(singleton($this->modelClass)->hasMethod('getCMSValidator')) {
+		if(singleton($this->modelClass)->hasMethod('getCMSValidator')) {
 			$detailValidator = singleton($this->modelClass)->getCMSValidator();
 			$listField->getConfig()->getComponentByType('GridFieldDetailForm')->setValidator($detailValidator);
 		}
 
-    $config = GridFieldConfig_HasManyRelationEditor::create();
-    $detailForm = $config->getComponentByType('GridFieldDetailForm')->setValidator(
-  		singleton('ExchangeRate')->getCMSValidator()
-  	);
-  	if (class_exists('GridFieldSortableRows')) {
-      $config->addComponent(new GridFieldSortableRows('SortOrder'));
-    }
+		$config = GridFieldConfig_HasManyRelationEditor::create();
+		$detailForm = $config->getComponentByType('GridFieldDetailForm')->setValidator(
+			singleton('ExchangeRate')->getCMSValidator()
+		);
+		if (class_exists('GridFieldSortableRows')) {
+			$config->addComponent(new GridFieldSortableRows('SortOrder'));
+		}
 
-    $fields = new FieldList(
-      $rootTab = new TabSet('Root',
-        $tabMain = new Tab('ExchangeRates',
-          GridField::create(
-            'ExchangeRates',
-            'ExchangeRates',
-            $shopConfig->ExchangeRates(),
-            $config
-          )
-        )
-      )
-    );
+		$fields = new FieldList(
+			$rootTab = new TabSet('Root',
+				$tabMain = new Tab('ExchangeRates',
+					GridField::create(
+						'ExchangeRates',
+						'ExchangeRates',
+						$shopConfig->ExchangeRates(),
+						$config
+					)
+				)
+			)
+		);
 
-    $actions = new FieldList();
-    $actions->push(FormAction::create('saveExchangeRateSettings', _t('GridFieldDetailForm.Save', 'Save'))
-      ->setUseButtonTag(true)
-      ->addExtraClass('ss-ui-action-constructive')
-      ->setAttribute('data-icon', 'add'));
+		$actions = new FieldList();
+		$actions->push(FormAction::create('saveExchangeRateSettings', _t('GridFieldDetailForm.Save', 'Save'))
+			->setUseButtonTag(true)
+			->addExtraClass('ss-ui-action-constructive')
+			->setAttribute('data-icon', 'add'));
 
-    $form = new Form(
-      $this,
-      'EditForm',
-      $fields,
-      $actions
-    );
+		$form = new Form(
+			$this,
+			'EditForm',
+			$fields,
+			$actions
+		);
 
-    $form->setTemplate('ShopAdminSettings_EditForm');
-    $form->setAttribute('data-pjax-fragment', 'CurrentForm');
-    $form->addExtraClass('cms-content cms-edit-form center ss-tabset');
-    if($form->Fields()->hasTabset()) $form->Fields()->findOrMakeTab('Root')->setTemplate('CMSTabSet');
-    $form->setFormAction(Controller::join_links($this->Link($this->sanitiseClassName($this->modelClass)), 'ExchangeRate/ExchangeRateSettingsForm'));
+		$form->setTemplate('ShopAdminSettings_EditForm');
+		$form->setAttribute('data-pjax-fragment', 'CurrentForm');
+		$form->addExtraClass('cms-content cms-edit-form center ss-tabset');
+		if($form->Fields()->hasTabset()) $form->Fields()->findOrMakeTab('Root')->setTemplate('CMSTabSet');
+		$form->setFormAction(Controller::join_links($this->Link($this->sanitiseClassName($this->modelClass)), 'ExchangeRate/ExchangeRateSettingsForm'));
 
-    $form->loadDataFrom($shopConfig);
+		$form->loadDataFrom($shopConfig);
 
-    return $form;
-  }
+		return $form;
+	}
 
-  public function saveExchangeRateSettings($data, $form) {
+	public function saveExchangeRateSettings($data, $form) {
 
-    //Hack for LeftAndMain::getRecord()
-    self::$tree_class = 'ShopConfig';
+		//Hack for LeftAndMain::getRecord()
+		self::$tree_class = 'ShopConfig';
 
-    $config = ShopConfig::get()->First();
-    $form->saveInto($config);
-    $config->write();
-    $form->sessionMessage('Saved Exchange Rate Settings', 'good');
+		$config = ShopConfig::get()->First();
+		$form->saveInto($config);
+		$config->write();
+		$form->sessionMessage('Saved Exchange Rate Settings', 'good');
 
-    $controller = $this;
-    $responseNegotiator = new PjaxResponseNegotiator(
-      array(
-        'CurrentForm' => function() use(&$controller) {
-          //return $controller->renderWith('ShopAdminSettings_Content');
-          return $controller->ExchangeRateSettingsForm()->forTemplate();
-        },
-        'Content' => function() use(&$controller) {
-          //return $controller->renderWith($controller->getTemplatesWithSuffix('_Content'));
-        },
-        'Breadcrumbs' => function() use (&$controller) {
-          return $controller->renderWith('CMSBreadcrumbs');
-        },
-        'default' => function() use(&$controller) {
-          return $controller->renderWith($controller->getViewer('show'));
-        }
-      ),
-      $this->response
-    ); 
-    return $responseNegotiator->respond($this->getRequest());
-  }
+		$controller = $this;
+		$responseNegotiator = new PjaxResponseNegotiator(
+			array(
+				'CurrentForm' => function() use(&$controller) {
+					//return $controller->renderWith('ShopAdminSettings_Content');
+					return $controller->ExchangeRateSettingsForm()->forTemplate();
+				},
+				'Content' => function() use(&$controller) {
+					//return $controller->renderWith($controller->getTemplatesWithSuffix('_Content'));
+				},
+				'Breadcrumbs' => function() use (&$controller) {
+					return $controller->renderWith('CMSBreadcrumbs');
+				},
+				'default' => function() use(&$controller) {
+					return $controller->renderWith($controller->getViewer('show'));
+				}
+			),
+			$this->response
+		); 
+		return $responseNegotiator->respond($this->getRequest());
+	}
 
-  public function getSnippet() {
+	public function getSnippet() {
 
-    if (!$member = Member::currentUser()) return false;
-    if (!Permission::check('CMS_ACCESS_' . get_class($this), 'any', $member)) return false;
+		if (!$member = Member::currentUser()) return false;
+		if (!Permission::check('CMS_ACCESS_' . get_class($this), 'any', $member)) return false;
 
-    return $this->customise(array(
-      'Title' => 'Exchange Rates Management',
-      'Help' => 'Create exchange rates',
-      'Link' => Controller::join_links($this->Link('ShopConfig'), 'ExchangeRate'),
-      'LinkTitle' => 'Edit exchange rates'
-    ))->renderWith('ShopAdmin_Snippet');
-  }
+		return $this->customise(array(
+			'Title' => 'Exchange Rates Management',
+			'Help' => 'Create exchange rates',
+			'Link' => Controller::join_links($this->Link('ShopConfig'), 'ExchangeRate'),
+			'LinkTitle' => 'Edit exchange rates'
+		))->renderWith('ShopAdmin_Snippet');
+	}
 
 }
 
 class ExchangeRate_PageControllerExtension extends Extension {
 
-	public static $allowed_actions = array(
+	private static $allowed_actions = array(
 		'CurrencyForm',
 		'setCurrency'
 	);
@@ -315,11 +315,11 @@ class ExchangeRate_PageControllerExtension extends Extension {
 			);
 
 			return new Form(
-	      $this->owner,
-	      'CurrencyForm',
-	      $fields,
-	      $actions
-	    );
+				$this->owner,
+				'CurrencyForm',
+				$fields,
+				$actions
+			);
 		}
 	}
 
@@ -357,7 +357,7 @@ class ExchangeRate_Extension extends DataExtension {
 			if ($rate && $rate->exists()) {
 				$amount->setAmount($amount->getAmount() * $rate->Rate);
 				$amount->setCurrency($rate->Currency);
-	    	$amount->setSymbol($rate->CurrencySymbol);
+				$amount->setSymbol($rate->CurrencySymbol);
 			}
 		}
 	}
@@ -365,10 +365,10 @@ class ExchangeRate_Extension extends DataExtension {
 
 class ExchangeRate_OrderExtension extends DataExtension {
 
-	public static $db = array(
+	private static $db = array(
 		'Currency' => 'Varchar(3)',
-    'CurrencySymbol' => 'Varchar(10)',
-    'ExchangeRate' => 'Decimal(19,4)',
+		'CurrencySymbol' => 'Varchar(10)',
+		'ExchangeRate' => 'Decimal(19,4)',
 	);
 
 	public function onBeforePayment() {
@@ -409,8 +409,8 @@ class ExchangeRate_OrderExtension extends DataExtension {
 			if ($this->owner->Currency && $this->owner->ExchangeRate) {
 				$amount->setAmount($amount->getAmount() * $this->owner->ExchangeRate);
 				$amount->setCurrency($this->owner->Currency);
-		  	$amount->setSymbol($this->owner->CurrencySymbol);
-		  }
+				$amount->setSymbol($this->owner->CurrencySymbol);
+			}
 		}
 		else if ($currency = Session::get('SWS.Currency')) {
 
@@ -423,7 +423,7 @@ class ExchangeRate_OrderExtension extends DataExtension {
 			if ($rate && $rate->exists()) {
 				$amount->setAmount($amount->getAmount() * $rate->Rate);
 				$amount->setCurrency($rate->Currency);
-	    	$amount->setSymbol($rate->CurrencySymbol);
+				$amount->setSymbol($rate->CurrencySymbol);
 			}
 		}
 	}
@@ -444,7 +444,7 @@ class ExchangeRate_OrderRelatedExtension extends DataExtension {
 			if ($order->Currency && $order->ExchangeRate) {
 				$amount->setAmount($amount->getAmount() * $order->ExchangeRate);
 				$amount->setCurrency($order->Currency);
-		  	$amount->setSymbol($order->CurrencySymbol);
+				$amount->setSymbol($order->CurrencySymbol);
 			}
 		}
 		else if ($currency = Session::get('SWS.Currency')) {
@@ -458,7 +458,7 @@ class ExchangeRate_OrderRelatedExtension extends DataExtension {
 			if ($rate && $rate->exists()) {
 				$amount->setAmount($amount->getAmount() * $rate->Rate);
 				$amount->setCurrency($rate->Currency);
-	    	$amount->setSymbol($rate->CurrencySymbol);
+				$amount->setSymbol($rate->CurrencySymbol);
 			}
 		}
 	}

@@ -2,7 +2,7 @@
 
 class ExchangeRateField extends DropdownField {
 
-	function FieldHolder($properties = array()) {
+	public function FieldHolder($properties = array()) {
 
 		Requirements::javascript(THIRDPARTY_DIR . '/jquery/jquery.js');
 		Requirements::javascript(THIRDPARTY_DIR . '/jquery-entwine/dist/jquery.entwine-dist.js');
