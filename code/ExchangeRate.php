@@ -115,11 +115,19 @@ class ExchangeRate_ShopConfigExtension extends DataExtension {
 
 class ExchangeRate_Admin extends ShopAdmin {
 
-	static $url_rule = 'ShopConfig/ExchangeRate';
-	static $url_priority = 150;
-	static $menu_title = 'Shop Exchange Rates';
+	private static $tree_class = 'ShopConfig';
+	
+	private static $allowed_actions = array(
+		'ExchangeRateSettings',
+		'ExchangeRateSettingsForm',
+		'saveExchangeRateSettings'
+	);
 
-	public static $url_handlers = array(
+	private static $url_rule = 'ShopConfig/ExchangeRate';
+	protected static $url_priority = 150;
+	private static $menu_title = 'Shop Exchange Rates';
+
+	private static $url_handlers = array(
 		'ShopConfig/ExchangeRate/ExchangeRateSettingsForm' => 'ExchangeRateSettingsForm',
 		'ShopConfig/ExchangeRate' => 'ExchangeRateSettings'
 	);
