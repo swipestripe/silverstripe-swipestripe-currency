@@ -3,7 +3,7 @@
  * Exchange rates that can be set in {@link SiteConfig}. Several flat rates can be set 
  * for any supported shipping country.
  */
-class ExchangeRate extends DataObject {
+class ExchangeRate extends DataObject implements PermissionProvider {
 	
 	/**
 	 * Fields for this tax rate
@@ -40,6 +40,33 @@ class ExchangeRate extends DataObject {
 	);
 
 	private static $default_sort = 'SortOrder';
+
+    public function providePermissions()
+    {
+        return array(
+            'EDIT_CURRENCY' => 'Edit Currency',
+        );
+    }
+
+    public function canEdit($member = null)
+    {
+        return Permission::check('EDIT_CURRENCY');
+    }
+
+    public function canView($member = null)
+    {
+        return true;
+    }
+
+    public function canDelete($member = null)
+    {
+        return Permission::check('EDIT_CURRENCY');
+    }
+
+    public function canCreate($member = null)
+    {
+        return Permission::check('EDIT_CURRENCY');
+    }
 
 	public function onBeforeWrite() {
 		parent::onBeforeWrite();
