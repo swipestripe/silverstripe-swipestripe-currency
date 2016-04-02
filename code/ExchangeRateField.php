@@ -1,18 +1,19 @@
 <?php
 
-class ExchangeRateField extends DropdownField {
+class ExchangeRateField extends DropdownField
+{
 
-	public function FieldHolder($properties = array()) {
+    public function FieldHolder($properties = array())
+    {
+        Requirements::javascript(THIRDPARTY_DIR . '/jquery/jquery.js');
+        Requirements::javascript(THIRDPARTY_DIR . '/jquery-entwine/dist/jquery.entwine-dist.js');
+        Requirements::javascript('swipestripe-currency/javascript/ExchangeRateField.js');
 
-		Requirements::javascript(THIRDPARTY_DIR . '/jquery/jquery.js');
-		Requirements::javascript(THIRDPARTY_DIR . '/jquery-entwine/dist/jquery.entwine-dist.js');
-		Requirements::javascript('swipestripe-currency/javascript/ExchangeRateField.js');
+        return parent::FieldHolder();
+    }
 
-		return parent::FieldHolder();
-	}
-
-	public function Type() {
-		return 'exchangerate';
-	}
+    public function Type()
+    {
+        return 'exchangerate';
+    }
 }
-
